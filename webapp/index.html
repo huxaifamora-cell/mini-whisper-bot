@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+<title>Whisper Personal</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root {
+    --bg: #07070b; --panel: #100f18; --panel-border: #211f30;
+    --purple: #8b5cf6; --purple-bright: #a78bfa;
+    --text: #f3f2f8; --text-dim: #8b899c;
+    --danger: #f26a6a; --success: #52e3a4;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: 'Inter', -apple-system, 'Segoe UI', sans-serif;
+    padding-bottom: 90px;
+  }
+  .header { text-align: center; padding: 16px 0 8px; }
+  .header img { width: 40px; height: 40px; border-radius: 8px; filter: drop-shadow(0 0 8px rgba(139,92,246,0.45)); }
+  .header h1 { font-size: 0.95rem; letter-spacing: 0.3em; margin: 8px 0 0; }
+  main { max-width: 480px; margin: 0 auto; padding: 12px; }
+  .panel { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+  .panel h2 { margin: 0 0 12px; font-size: 1rem; }
+  .rule-form { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  input, select, textarea {
+    background: #0c0b13; border: 1px solid var(--panel-border); color: var(--text);
+    padding: 12px; border-radius: 10px; font-size: 0.92rem; font-family: inherit;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--purple), #6d3ee0); color: white; border: none;
+    padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer;
+  }
+  .sub { color: var(--text-dim); font-size: 0.82rem; }
+  .alert-card {
+    background: #0c0b13; border: 1px solid var(--panel-border); border-radius: 10px;
+    padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: flex-start;
+  }
+  .status-active { color: var(--success); }
+  .status-triggered { color: var(--purple-bright); }
+  .link-btn { background: none; border: none; color: var(--danger); font-size: 0.8rem; }
+  .tabbar {
+    position: fixed; bottom: 0; left: 0; right: 0; display: flex;
+    background: var(--panel); border-top: 1px solid var(--panel-border);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .tab-btn { flex: 1; text-align: center; padding: 12px 4px; font-size: 0.72rem; color: var(--text-dim); background: none; border: none; }
+  .tab-btn.active { color: var(--purple-bright); }
+  .tab-icon { font-size: 1.2rem; display: block; margin-bottom: 2px; }
+  .view { display: none; }
+  .view.active { display: block; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="font-size:2rem;">👂</div>
+  <h1>WHISPER PERSONAL</h1>
+</div>
+
+<main>
+  <section id="alertsView" class="view active">
+    <div class="panel">
+      <h2>Upcoming alerts</h2>
+      <div id="alertsList"></div>
+      <p id="alertsEmpty" class="sub hidden">No alerts yet — tap Create below.</p>
+    </div>
+  </section>
+
+  <section id="createView" class="view">
+    <div class="panel">
+      <h2>Create alert</h2>
+      <form id="alertForm" class="rule-form">
+        <select id="symbolSelect" required></select>
+        <input id="timeframeInput" type="text" placeholder="Timeframe (e.g. M15)" required />
+        <input id="priceInput" type="number" step="any" placeholder="Target price" required />
+        <select id="directionSelect">
+          <option value="buy">Buy (price crosses up)</option>
+          <option value="sell">Sell (price crosses down)</option>
+        </select>
+        <button type="submit" class="btn-primary">Create alert</button>
+      </form>
+      <p id="createStatus" class="sub" style="margin-top:8px;"></p>
+    </div>
+  </section>
+
+  <section id="historyView" class="view">
+    <div class="panel">
+      <h2>Triggered</h2>
+      <div id="historyList"></div>
+      <p id="historyEmpty" class="sub hidden">Nothing triggered yet.</p>
+    </div>
+  </section>
+</main>
+
+<nav class="tabbar">
+  <button class="tab-btn active" data-view="alertsView"><span class="tab-icon">🔔</span>Alerts</button>
+  <button class="tab-btn" data-view="createView"><span class="tab-icon">➕</span>Create</button>
+  <button class="tab-btn" data-view="historyView"><span class="tab-icon">🕘</span>History</button>
+</nav>
+
+<!-- Full-screen alarm overlay, shown when the app is open and an alert fires -->
+<div id="alarmOverlay" class="hidden" style="position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;">
+  <div style="font-size:3rem;margin-bottom:16px;">👂</div>
+  <div id="alarmTitle" style="font-size:1.3rem;font-weight:700;margin-bottom:8px;"></div>
+  <div id="alarmDetails" style="color:var(--purple-bright);font-size:1rem;margin-bottom:32px;"></div>
+  <button id="dismissAlarmBtn" class="btn-primary" style="width:100%;max-width:280px;">Dismiss</button>
+</div>
+<audio id="alertAudio" src="alert_tone.wav" loop></audio>
+
+<script src="app.js"></script>
+</body>
+</html>
